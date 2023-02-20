@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/cozinhas")
@@ -25,21 +26,30 @@ public class CozinhaController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Cozinha> listar() {
-        return repository.listar();
+        return repository.findAll();
     }
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     public CozinhasXmlWrapper listarXml() {
-        return new CozinhasXmlWrapper(repository.listar());
+        return new CozinhasXmlWrapper(repository.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Cozinha> buscar(@PathVariable Long id) {
-        Cozinha cozinha = repository.buscar(id);
-        if (cozinha != null) {
-            return ResponseEntity.ok(cozinha);
-        }
-        return ResponseEntity.notFound().build();
+        Optional<Cozinha> cozinha = repository.findById(id);
+        return cozinha.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/find-by-name")
+    public ResponseEntity<Optional<Cozinha>> findByName(@RequestParam("name") String name) {
+        Optional<Cozinha> byName = repository.findByName(name);
+        return ResponseEntity.ok(byName);
+    }
+
+    @GetMapping("/find-by-name-contain")
+    public ResponseEntity<List<Cozinha>> findByNameContaining(@RequestParam("name") String name) {
+        List<Cozinha> byName = service.findByNameContaining(name);
+        return ResponseEntity.ok(byName);
     }
 
     @PostMapping
@@ -51,21 +61,21 @@ public class CozinhaController {
     @PutMapping("/{id}")
     public ResponseEntity<Cozinha> atualizar(@PathVariable Long id,
                                              @RequestBody Cozinha cozinha) {
-        Cozinha cozinhaAtual = repository.buscar(id);
+        Optional<Cozinha> cozinhaAtual = repository.findById(id);
 
-        if (cozinhaAtual != null) {
+        if (cozinhaAtual.isPresent()) {
 //        cozinhaAtual.setName(cozinha.getName());
-            BeanUtils.copyProperties(cozinha, cozinhaAtual, "id"); //copia os dados de um objeto para o outro
-            repository.salvar(cozinhaAtual);
-            return ResponseEntity.ok(cozinhaAtual);
+            BeanUtils.copyProperties(cozinha, cozinhaAtual.get(), "id"); //copia os dados de um objeto para o outro
+            Cozinha coz = service.salvar(cozinhaAtual.get());
+            return ResponseEntity.ok(coz);
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> remover(@PathVariable Long id) {
-        Cozinha cozinha = repository.buscar(id);
-        if (cozinha != null) {
+        Optional<Cozinha> cozinha = repository.findById(id);
+        if (cozinha.isPresent()) {
             service.excluir(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
