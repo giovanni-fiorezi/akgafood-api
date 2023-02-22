@@ -31,7 +31,7 @@ public class RestauranteService {
     }
 
     public List<Restaurante> findByNameContainingAndCozinha(String name, Long cozinhaId) {
-        return restauranteRepository.findByNameContainingAndCozinhaId(name, cozinhaId);
+        return restauranteRepository.consultarPorNome(name, cozinhaId);
     }
 
     public void excluir(Long id) {

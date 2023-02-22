@@ -5,6 +5,8 @@ import br.com.algafoodapi.domain.model.Restaurante;
 import br.com.algafoodapi.domain.repository.CozinhaRepository;
 import br.com.algafoodapi.domain.repository.RestauranteRepository;
 import br.com.algafoodapi.domain.service.RestauranteService;
+import br.com.algafoodapi.infraestructure.repository.spec.RestauranteComFreteGratisSpec;
+import br.com.algafoodapi.infraestructure.repository.spec.RestauranteComNomeSemelhanteSpec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,5 +111,27 @@ public class RestauranteController {
 //			System.out.println(nomePropriedade + " = " + valorPropriedade + " = " + novoValor);
             ReflectionUtils.setField(field, restauranteDestino, novoValor);
         });
+    }
+
+    @GetMapping("/first-name")
+    public Optional<Restaurante> findByFirstName(String name) {
+        return restauranteRepository.findFirstRestauranteByNameContaining(name);
+    }
+
+    @GetMapping("/find-test")
+    public List<Restaurante> find(String name, BigDecimal taxaInicial, BigDecimal taxaFinal) {
+        return restauranteRepository.find(name, taxaInicial, taxaFinal);
+    }
+
+    @GetMapping("/count-por-cozinha")
+    public int restaurantesCountPorCozinha(Long cozinhaId) {
+        return restauranteRepository.countByCozinhaId(cozinhaId);
+    }
+
+    public List<Restaurante> restaurantesComFreteGratis(String name) {
+        var comFreteGratis = new RestauranteComFreteGratisSpec();
+        var comNomeSemelhante = new RestauranteComNomeSemelhanteSpec(name);
+
+        return restauranteRepository.findAll(comFreteGratis.and(comNomeSemelhante));
     }
 }
