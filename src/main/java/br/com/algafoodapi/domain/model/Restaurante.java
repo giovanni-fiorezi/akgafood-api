@@ -1,17 +1,18 @@
 package br.com.algafoodapi.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.Hibernate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
-@Getter
-@Setter
-@ToString
 @RequiredArgsConstructor
+@Data
 public class Restaurante {
 
     @Id
@@ -25,16 +26,25 @@ public class Restaurante {
     @ManyToOne
     private Cozinha cozinha;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Restaurante that = (Restaurante) o;
-        return id != null && Objects.equals(id, that.id);
-    }
+    @CreationTimestamp
+    @Column(nullable = false)
+    private LocalDateTime dataCadastro;
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime dataAtualizacao;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "restaurante_forma_pagamento",
+            joinColumns = @JoinColumn(name = "restaurante_id"),
+            inverseJoinColumns = @JoinColumn(name = "forma_pagamento_id"))
+    private List<FormaPagamento> formasPagamento = new ArrayList<>();
+
+    @JsonIgnore
+    @Embedded
+    private Endereco endereco;
+
+    @OneToMany(mappedBy = "restaurante")
+    private List<Produto> produtos = new ArrayList<>();
 }
