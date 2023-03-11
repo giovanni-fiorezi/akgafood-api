@@ -1,6 +1,7 @@
 package br.com.algafoodapi.domain.service;
 
 import br.com.algafoodapi.domain.exception.EntidadeEmUsoException;
+import br.com.algafoodapi.domain.exception.EntidadeNaoEncontradaException;
 import br.com.algafoodapi.domain.model.Cozinha;
 import br.com.algafoodapi.domain.repository.CozinhaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,13 @@ public class CozinhaService {
             throw new EntidadeEmUsoException(String.format("Cozinha de codigo %s nao pode ser removida," +
                     "pois esta em uso", id));
         } catch (EmptyResultDataAccessException e) {
-            throw new EntidadeEmUsoException(String.format("Cozinha de código %d não pode ser removida, pois está em uso", id));
+            throw new EntidadeNaoEncontradaException(String.format("Cozinha de código %d não foi encontrada", id));
         }
     }
 
+    public Cozinha buscarOuFalhar(Long idCozinha) {
+        return repository.findById(idCozinha).orElseThrow(() -> new EntidadeNaoEncontradaException(
+                String.format("Não existe um cadastro de cozinha com código %d", idCozinha)));
+    }
 
 }
