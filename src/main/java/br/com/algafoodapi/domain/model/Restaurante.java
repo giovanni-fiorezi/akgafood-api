@@ -1,6 +1,7 @@
 package br.com.algafoodapi.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -23,13 +24,18 @@ public class Restaurante {
 
     private BigDecimal taxaFrete;
 
-    @ManyToOne
+//    @JsonIgnore
+    @JsonIgnoreProperties("hibernateLazyInitializer")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cozinha_id", nullable = false)
     private Cozinha cozinha;
 
+    @JsonIgnore
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDateTime dataCadastro;
 
+    @JsonIgnore
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime dataAtualizacao;
@@ -40,11 +46,13 @@ public class Restaurante {
             joinColumns = @JoinColumn(name = "restaurante_id"),
             inverseJoinColumns = @JoinColumn(name = "forma_pagamento_id"))
     private List<FormaPagamento> formasPagamento = new ArrayList<>();
+    
 
     @JsonIgnore
     @Embedded
     private Endereco endereco;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "restaurante")
     private List<Produto> produtos = new ArrayList<>();
 }

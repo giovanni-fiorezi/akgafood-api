@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -24,4 +25,7 @@ public interface RestauranteRepository extends JpaRepository<Restaurante, Long>,
     List<Restaurante> find(String name, BigDecimal taxaInicial, BigDecimal taxaFinal);
 
     int countByCozinhaId(Long cozinhaId);
+
+    @Query("from Restaurante r join r.cozinha")
+    List<Restaurante> findAll();
 }
